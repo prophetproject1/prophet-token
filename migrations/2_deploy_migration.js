@@ -1,5 +1,5 @@
-const PROP = artifacts.require("PROP");
+const PROPHETTOKEN = artifacts.require("PROPHETTOKEN");
 
 module.exports = function (deployer) {
-  deployer.deploy(PROP,'PROP',"PROPHET TOKEN");
+  deployer.deploy(PROPHETTOKEN,'1000000000000000000000000');
 };

@@ -226,8 +226,8 @@ library SafeMath {
 contract PROPHETTOKEN is Context, IERC20 {
     using SafeMath for uint256;
 
-    event PROPTransfer(address indexed from, address indexed to, uint256 value); 
-    event PROPApproval(address indexed owner, address indexed spender, uint256 value);
+    event PROPTransfer(address indexed from, address indexed to, uint256 internalAmt); 
+    event PROPApproval(address indexed owner, address indexed spender, uint256 internalAmt);
 
     event ChangebareTax(uint256 bareTax);
     event AdminChanged(address admin);
@@ -237,7 +237,7 @@ contract PROPHETTOKEN is Context, IERC20 {
     mapping(address => mapping(address => uint256)) private _allowances;
 
 
-    uint256 public _totalSupply;
+    uint256 internal _totalSupply;
 
     string public name = "PROPHETTOKEN"; 
     string public symbol="PROP";
@@ -255,23 +255,22 @@ contract PROPHETTOKEN is Context, IERC20 {
     
   
     function setbareTax(uint256 _bareTax) external onlyAdmin() {
-        require(_bareTax >= bareTax,'the bareTax should be greater than previous bareTax');
+        require(_bareTax < bareTax,'the bareTax should be less than previous bareTax');
         bareTax = _bareTax;
         emit ChangebareTax(bareTax);
     }
 
     function totalSupply() public view override returns (uint256) {
-        uint256 value;
-        value = _totalSupply.mul(bareTax).div(deci);   
-        return value;
+        uint256 externaAmt;
+        externaAmt = _totalSupply.mul(bareTax).div(deci);   
+        return externaAmt;
     }
 
 
     function balanceOf(address account) public override view returns (uint256) {
-        uint256 value;
-        value = _balances[account].mul(bareTax).div(deci);   
-
-        return value;
+        uint256 externalAmt;
+        externalAmt = _balances[account].mul(bareTax).div(deci);   
+        return externalAmt;
     }
 
     function transfer(address recipient, uint256 amount)
@@ -280,11 +279,11 @@ contract PROPHETTOKEN is Context, IERC20 {
         override
         returns (bool)
     {
-        uint256 value;
+        uint256 internalAmt;
+        uint256 externalAmt = amount; 
+        internalAmt = (amount.mul(deci)).div(bareTax); 
 
-        value = (amount.mul(deci)).div(bareTax); 
-
-        _transfer(msg.sender, recipient, value,amount);
+        _transfer(msg.sender, recipient,internalAmt,externalAmt);
         return true;
     }
 
@@ -295,10 +294,9 @@ contract PROPHETTOKEN is Context, IERC20 {
         view
         returns (uint256)
     {
-        uint256 value;
-        value = (_allowances[owner][spender]).mul(bareTax).div(deci);   
-        
-        return value;
+        uint256 internalAmt;
+        internalAmt = (_allowances[owner][spender]).mul(bareTax).div(deci);   
+        return internalAmt;
     }
 
     function approve(address spender, uint256 amount)
@@ -307,9 +305,10 @@ contract PROPHETTOKEN is Context, IERC20 {
         override
         returns (bool)
     {
-        uint256 value;
-        value = amount.mul(deci).div(bareTax);
-        _approve(msg.sender, spender, value,amount);
+        uint256 internalAmt;
+        uint externalAmt = amount;
+        internalAmt = externalAmt.mul(deci).div(bareTax);
+        _approve(msg.sender, spender, internalAmt,externalAmt);
         return true;
     }
 
@@ -318,17 +317,19 @@ contract PROPHETTOKEN is Context, IERC20 {
         address recipient,
         uint256 amount
     ) public virtual override returns (bool) {
-        uint256 value;
-        value = amount.mul(deci).div(bareTax);
-        _transfer(sender, recipient, value,amount);
+        uint256 internalAmt;
+        uint256 externalAmt = amount;
+
+        internalAmt = externalAmt.mul(deci).div(bareTax);
+        _transfer(sender, recipient, internalAmt,externalAmt);
         _approve(
             sender,
             _msgSender(),
             _allowances[sender][msg.sender].sub(
-                value,
+                internalAmt,
                 "ERC20: transfer amount exceeds allowance"
             ),
-            amount
+            externalAmt
         );
         return true;
     }
@@ -336,38 +337,21 @@ contract PROPHETTOKEN is Context, IERC20 {
     function _transfer(
         address sender,
         address recipient,
-        uint256 amount,
-        uint256 externalvalue
+        uint256 internalAmt,
+        uint256 externalAmt
     ) internal  virtual {
         require(sender != address(0), "ERC20: transfer from the zero address");
         require(recipient != address(0), "ERC20: transfer to the zero address");
 
 
         _balances[sender] = _balances[sender].sub(
-            amount,
-            "ERC20: transfer amount exceeds balance"
+            internalAmt,
+            "ERC20: transfer internalAmt exceeds balance"
         );
-        _balances[recipient] = _balances[recipient].add(amount);
-        emit Transfer(sender, recipient, amount);
-        emit PROPTransfer(sender,recipient,externalvalue);
+        _balances[recipient] = _balances[recipient].add(internalAmt);
+        emit Transfer(sender, recipient, externalAmt);
+        emit PROPTransfer(sender,recipient, internalAmt);
     }
-
-    // function mint(uint256 amount) public virtual onlyAdmin() returns (bool) {
-    //     uint256 value;
-    //     value = amount.mul(deci).div(bareTax);
-    //     _mint(admin, value,amount);  
-    //     return true;
-    // }
-
-    // function _mint(address account, uint256 amount,uint externalvalue) internal virtual {
-    //     require(account != address(0), "ERC20: mint to the zero address");
-
-
-    //     _totalSupply = _totalSupply.add(amount);
-    //     _balances[account] = _balances[account].add(amount);
-    //     emit PROPTransfer(address(0), account, externalvalue);
-    //     emit Transfer(address(0), account, amount);
-    // }
 
     function burn(uint256 amount) public virtual onlyAdmin() returns (bool) {
         uint256 internalAmt;
@@ -387,22 +371,22 @@ contract PROPHETTOKEN is Context, IERC20 {
             "ERC20: burn internaAmt exceeds balance"
         );
         _totalSupply = _totalSupply.sub(internaAmt);
-        emit Transfer(account, address(0), internaAmt);
-        emit PROPTransfer(account, address(0), externalAmt);
+        emit Transfer(account, address(0), externalAmt);
+        emit PROPTransfer(account, address(0), internaAmt);
     }
 
     function _approve(
         address owner,
         address spender,
-        uint256 amount,
-        uint256 externalvalue
+        uint256 internalAmt,
+        uint256 externalAmt
     ) internal virtual {
         require(owner != address(0), "ERC20: approve from the zero address");
         require(spender != address(0), "ERC20: approve to the zero address");
  
-        _allowances[owner][spender] = amount;
-        emit Approval(owner, spender, amount);
-        emit PROPApproval(owner,spender,externalvalue);
+        _allowances[owner][spender] = internalAmt;
+        emit Approval(owner, spender, externalAmt);
+        emit PROPApproval(owner,spender,internalAmt);
     }
 
     function TransferOwnerShip(address account) public onlyAdmin(){

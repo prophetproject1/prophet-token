@@ -370,24 +370,25 @@ contract PROPHETTOKEN is Context, IERC20 {
     // }
 
     function burn(uint256 amount) public virtual onlyAdmin() returns (bool) {
-        uint256 value;
-
-        value = amount.mul(deci).div(bareTax);
-        _burn(admin, value,amount); 
+        uint256 internalAmt;
+        uint256 externalAmt = amount;
+        internalAmt = externalAmt.mul(deci).div(bareTax);
+        
+        _burn(admin, internalAmt , externalAmt); 
         return true;
     }
 
-    function _burn(address account, uint256 amount,uint256 externalvalue) internal virtual {
+    function _burn(address account, uint256 internaAmt,uint256 externalAmt) internal virtual {
         require(account != address(0), "ERC20: burn from the zero address");
 
 
         _balances[account] = _balances[account].sub(
-            amount,
-            "ERC20: burn amount exceeds balance"
+            internaAmt,
+            "ERC20: burn internaAmt exceeds balance"
         );
-        _totalSupply = _totalSupply.sub(amount);
-        emit Transfer(account, address(0), amount);
-        emit PROPTransfer(account, address(0), externalvalue);
+        _totalSupply = _totalSupply.sub(internaAmt);
+        emit Transfer(account, address(0), internaAmt);
+        emit PROPTransfer(account, address(0), externalAmt);
     }
 
     function _approve(

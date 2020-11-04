@@ -261,7 +261,9 @@ contract PROPHETTOKEN is Context, IERC20 {
     }
 
     function totalSupply() public view override returns (uint256) {
-        return _totalSupply;
+        uint256 value;
+        value = _totalSupply.mul(bareTax).div(deci);   
+        return value;
     }
 
 
@@ -350,22 +352,22 @@ contract PROPHETTOKEN is Context, IERC20 {
         emit PROPTransfer(sender,recipient,externalvalue);
     }
 
-    function mint(uint256 amount) public virtual onlyAdmin() returns (bool) {
-        uint256 value;
-        value = amount.mul(deci).div(bareTax);
-        _mint(admin, value,amount);  
-        return true;
-    }
+    // function mint(uint256 amount) public virtual onlyAdmin() returns (bool) {
+    //     uint256 value;
+    //     value = amount.mul(deci).div(bareTax);
+    //     _mint(admin, value,amount);  
+    //     return true;
+    // }
 
-    function _mint(address account, uint256 amount,uint externalvalue) internal virtual {
-        require(account != address(0), "ERC20: mint to the zero address");
+    // function _mint(address account, uint256 amount,uint externalvalue) internal virtual {
+    //     require(account != address(0), "ERC20: mint to the zero address");
 
 
-        _totalSupply = _totalSupply.add(amount);
-        _balances[account] = _balances[account].add(amount);
-        emit PROPTransfer(address(0), account, externalvalue);
-        emit Transfer(address(0), account, amount);
-    }
+    //     _totalSupply = _totalSupply.add(amount);
+    //     _balances[account] = _balances[account].add(amount);
+    //     emit PROPTransfer(address(0), account, externalvalue);
+    //     emit Transfer(address(0), account, amount);
+    // }
 
     function burn(uint256 amount) public virtual onlyAdmin() returns (bool) {
         uint256 value;

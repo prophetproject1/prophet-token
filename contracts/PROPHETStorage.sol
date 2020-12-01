@@ -20,7 +20,7 @@ contract PROPHETStorage {
 
     string public constant name = "PROPHETTOKEN";
     string public constant symbol = "PROP";
-    uint256 public multiplier;
+    uint256 public baretax;
     uint8 public constant decimals = 18;
     address public admin;
     uint256 internal constant deci = 1e18;

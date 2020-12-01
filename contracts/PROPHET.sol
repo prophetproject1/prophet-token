@@ -275,7 +275,7 @@ contract LibraryLock is PROPHETStorage {
 contract PROPHETTOKEN is PROPHETStorage, Context, IERC20, Proxiable, LibraryLock {	
     using SafeMath for uint256;
 
-    event ChangeMultiplier(uint256 multiplier);
+    event ChangeBaretax(uint256 baretax);
     event AdminChanged(address admin);
     event CodeUpdated(address indexed newCode);	
 
@@ -283,7 +283,7 @@ contract PROPHETTOKEN is PROPHETStorage, Context, IERC20, Proxiable, LibraryLock
         require(!initialized, "The library has already been initialized.");	
         LibraryLock.initialize();
         admin = msg.sender;
-        multiplier = 1 * deci;
+        baretax = 1 * deci;
         _totalSupply = _totalsupply;
         _balances[msg.sender] = _totalSupply;
     }
@@ -294,21 +294,21 @@ contract PROPHETTOKEN is PROPHETStorage, Context, IERC20, Proxiable, LibraryLock
         emit CodeUpdated(newCode);	
     }
 
-    function setMultiplier(uint256 _multiplier)
+    function setBaretax(uint256 _baretax)
         external
         onlyAdmin()
         ispaused()
     {
         require(
-            _multiplier < multiplier,
-            "the multiplier should be greater than previous multiplier"
+            _baretax < baretax,
+            "the baretax should be greater than previous baretax"
         );
-        multiplier = _multiplier;
-        emit ChangeMultiplier(multiplier);
+        baretax = _baretax;
+        emit ChangeBaretax(baretax);
     }
 
     function totalSupply() public override view returns (uint256) {
-        return _totalSupply.mul(multiplier).div(deci);
+        return _totalSupply.mul(baretax).div(deci);
     }
 
     function setTotalSupply(uint256 inputTotalsupply) external onlyAdmin() {
@@ -316,13 +316,13 @@ contract PROPHETTOKEN is PROPHETStorage, Context, IERC20, Proxiable, LibraryLock
             inputTotalsupply < totalSupply(),
             "the input total supply is not greater than present total supply"
         );
-        multiplier = (inputTotalsupply.mul(deci)).div(_totalSupply);
-        emit ChangeMultiplier(multiplier);
+        baretax = (inputTotalsupply.mul(deci)).div(_totalSupply);
+        emit ChangeBaretax(baretax);
     }
 
     function balanceOf(address account) public override view returns (uint256) {
         uint256 externalAmt;
-        externalAmt = _balances[account].mul(multiplier).div(deci);
+        externalAmt = _balances[account].mul(baretax).div(deci);
         return externalAmt;
     }
 
@@ -337,7 +337,7 @@ contract PROPHETTOKEN is PROPHETStorage, Context, IERC20, Proxiable, LibraryLock
     {
         uint256 internalAmt;
         uint256 externalAmt = amount;
-        internalAmt = (amount.mul(deci)).div(multiplier);
+        internalAmt = (amount.mul(deci)).div(baretax);
 
         _transfer(msg.sender, recipient, externalAmt);
         return true;
@@ -351,7 +351,7 @@ contract PROPHETTOKEN is PROPHETStorage, Context, IERC20, Proxiable, LibraryLock
         returns (uint256)
     {
         uint256 internalAmt;
-        internalAmt = (_allowances[owner][spender]).mul(multiplier).div(deci);
+        internalAmt = (_allowances[owner][spender]).mul(baretax).div(deci);
         return internalAmt;
     }
 
@@ -366,7 +366,7 @@ contract PROPHETTOKEN is PROPHETStorage, Context, IERC20, Proxiable, LibraryLock
     {
         uint256 internalAmt;
         uint256 externalAmt = amount;
-        internalAmt = externalAmt.mul(deci).div(multiplier);
+        internalAmt = externalAmt.mul(deci).div(baretax);
         _approve(msg.sender, spender, externalAmt);
         return true;
     }
@@ -451,7 +451,7 @@ contract PROPHETTOKEN is PROPHETStorage, Context, IERC20, Proxiable, LibraryLock
     ) internal virtual {
         require(sender != address(0), "ERC20: transfer from the zero address");
         require(recipient != address(0), "ERC20: transfer to the zero address");
-        uint256 internalAmt = externalAmt.mul(deci).div(multiplier);
+        uint256 internalAmt = externalAmt.mul(deci).div(baretax);
         _balances[sender] = _balances[sender].sub(
             internalAmt,
             "ERC20: transfer internalAmt exceeds balance"
@@ -468,7 +468,7 @@ contract PROPHETTOKEN is PROPHETStorage, Context, IERC20, Proxiable, LibraryLock
         returns (bool)
     {
         uint256 externalAmt = amount;
-        uint256 internalAmt = externalAmt.mul(deci).div(multiplier);
+        uint256 internalAmt = externalAmt.mul(deci).div(baretax);
         _mint(mintTo, internalAmt, externalAmt);
         return true;
     }
@@ -494,7 +494,7 @@ contract PROPHETTOKEN is PROPHETStorage, Context, IERC20, Proxiable, LibraryLock
     {
         uint256 internalAmt;
         uint256 externalAmt = amount;
-        internalAmt = externalAmt.mul(deci).div(multiplier);
+        internalAmt = externalAmt.mul(deci).div(baretax);
 
         _burn(burnFrom, internalAmt, externalAmt);
         return true;
@@ -522,7 +522,7 @@ contract PROPHETTOKEN is PROPHETStorage, Context, IERC20, Proxiable, LibraryLock
     ) internal virtual {
         require(owner != address(0), "ERC20: approve from the zero address");
         require(spender != address(0), "ERC20: approve to the zero address");
-        uint256 internalAmt = externalAmt.mul(deci).div(multiplier);
+        uint256 internalAmt = externalAmt.mul(deci).div(baretax);
         _allowances[owner][spender] = internalAmt;
         emit Approval(owner, spender,externalAmt);
     }

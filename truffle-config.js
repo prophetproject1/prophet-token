@@ -1,3 +1,12 @@
+const path = require("path");
+const fs = require("fs");
+
+const PRIVATE_KEY =
+  "11e674c6a3f608fc8bd56411b584f56d1f657611e2032b357fc305dd459e421a";
+const INFURA_KEY =
+  "https://kovan.infura.io/v3/63273290f2b64f1d956e2a607d17b196";
+const ROPSTEN_KEY = "";
+const provider = require("@truffle/hdwallet-provider");
 /**
  * Use this file to configure your truffle project. It's seeded with some
  * common settings for different networks and features like migrations,
@@ -6,7 +15,7 @@
  *
  * More information about configuration can be found at:
  *
- * trufflesuite.com/docs/advanced/configuration
+ * truffleframework.com/docs/advanced/configuration
  *
  * To deploy via Infura you'll need a wallet provider (like @truffle/hdwallet-provider)
  * to sign your transactions before they're sent to a remote public node. Infura accounts
@@ -42,10 +51,28 @@ module.exports = {
     // tab if you use this network and you must also set the `host`, `port` and `network_id`
     // options below to some value.
     //
+    ropsten: {
+      provider: () => new provider(PRIVATE_KEY, ROPSTEN_KEY, 0, 1),
+      gas: 6204493,
+      gasPrice: 20,
+      network_id: 3,
+      confirmations: 2, // # of confs to wait between deployments. (default: 0)
+      timeoutBlocks: 200, // # of blocks before a deployment times out  (minimum/default: 50)
+      skipDryRun: true,
+    },
+    kovan: {
+      provider: () => new provider(PRIVATE_KEY, INFURA_KEY, 0, 1),
+      // gas: 20000000000,
+      gasPrice: 20000000000,
+      network_id: 42,
+      confirmations: 2, // # of confs to wait between deployments. (default: 0)
+      timeoutBlocks: 200, // # of blocks before a deployment times out  (minimum/default: 50)
+      skipDryRun: true,
+    },
     // development: {
-    //  host: "127.0.0.1",     // Localhost (default: none)
-    //  port: 8545,            // Standard Ethereum port (default: none)
-    //  network_id: "*",       // Any network (default: none)
+    //   host: "127.0.0.1", // Localhost (default: none)
+    //   port: 7545, // Standard Ethereum port (default: none)
+    //   network_id: "*", // Any network (default: none)
     // },
     // Another network with more advanced options...
     // advanced: {
@@ -82,7 +109,7 @@ module.exports = {
   // Configure your compilers
   compilers: {
     solc: {
-      version: "^0.6.12",    // Fetch exact version from solc-bin (default: truffle's version)
+      version: "^0.6.12", // Fetch exact version from solc-bin (default: truffle's version)
       // docker: true,        // Use "0.5.1" you've installed locally with docker (default: false)
       // settings: {          // See the solidity docs for advice about optimization and evmVersion
       //  optimizer: {

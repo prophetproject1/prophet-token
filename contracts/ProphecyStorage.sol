@@ -2,7 +2,7 @@
 
 pragma solidity ^0.6.0;
 
-contract PROPHETStorage {
+contract ProphecyStorage {
     /** WARNING: NEVER RE-ORDER VARIABLES! 
      *  Always double-check that new variables are added APPEND-ONLY.
      *  Re-ordering variables can permanently BREAK the deployed proxy contract.
@@ -18,8 +18,8 @@ contract PROPHETStorage {
 
     uint256 internal _totalSupply;
 
-    string public constant name = "PROPHETTOKEN";
-    string public constant symbol = "PROP";
+    string public constant name = "ProphecyTOKEN";
+    string public constant symbol = "PRY";
     uint256 public baretax;
     uint8 public constant decimals = 18;
     address public admin;

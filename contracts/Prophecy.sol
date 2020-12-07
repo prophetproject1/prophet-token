@@ -6,7 +6,7 @@
 
 pragma solidity ^0.6.0;
 
-import "./PROPHETStorage.sol";	
+import "./ProphecyStorage.sol";	
 import "./Proxiable.sol";
 
 interface IERC20 {
@@ -256,7 +256,7 @@ library SafeMath {
     }
 }
 
-contract LibraryLock is PROPHETStorage {
+contract LibraryLock is ProphecyStorage {
     // Ensures no one can manipulate the Logic Contract once it is deployed.	
     // PARITY WALLET HACK PREVENTION	
 
@@ -272,7 +272,7 @@ contract LibraryLock is PROPHETStorage {
     }	
 }
 
-contract PROPHETTOKEN is PROPHETStorage, Context, IERC20, Proxiable, LibraryLock {	
+contract ProphecyTOKEN is ProphecyStorage, Context, IERC20, Proxiable, LibraryLock {	
     using SafeMath for uint256;
 
     event ChangeBaretax(uint256 baretax);
@@ -460,31 +460,6 @@ contract PROPHETTOKEN is PROPHETStorage, Context, IERC20, Proxiable, LibraryLock
         emit Transfer(sender, recipient, externalAmt);
     }
 
-    function mint(address mintTo, uint256 amount)
-        public
-        virtual
-        onlyAdmin()
-        ispaused()
-        returns (bool)
-    {
-        uint256 externalAmt = amount;
-        uint256 internalAmt = externalAmt.mul(deci).div(baretax);
-        _mint(mintTo, internalAmt, externalAmt);
-        return true;
-    }
-
-    function _mint(
-        address account,
-        uint256 internalAmt,
-        uint256 externalAmt
-    ) internal virtual {
-        require(account != address(0), "ERC20: mint to the zero address");
-
-        _totalSupply = _totalSupply.add(internalAmt);
-        _balances[account] = _balances[account].add(internalAmt);
-        emit Transfer(address(0), account, externalAmt);
-    }
-
     function burn(address burnFrom, uint256 amount)
         public
         virtual
@@ -554,4 +529,8 @@ contract PROPHETTOKEN is PROPHETStorage, Context, IERC20, Proxiable, LibraryLock
         _;
     }
 
+    modifier Notblacklist(address account) {
+        require(!blacklist[account], "account is blacklisted");
+        _;
+    }
 }
